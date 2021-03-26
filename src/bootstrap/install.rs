@@ -240,6 +240,11 @@ install!((self, builder, _config),
         });
         install_sh(builder, "rustc", self.compiler.stage, Some(self.target), &tarball);
     };
+    RustcDev, "rustc-dev", Self::should_build(_config), only_hosts: true, {
+        let tarball = builder.ensure(dist::RustcDev { compiler: self.compiler, target: self.target })
+            .expect("missing rustc-dev");
+        install_sh(builder, "rustc-dev", self.compiler.stage, Some(self.target), &tarball);
+    };
 );
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]

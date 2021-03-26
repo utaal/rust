@@ -280,7 +280,7 @@ changelog-seen = 2
 # all extended tools except `rust-demangler`, unless the target is also being
 # built with `profiler = true`. If chosen tool failed to build the installation
 # fails. If `extended = false`, this option is ignored.
-#tools = ["cargo", "rls", "clippy", "rustfmt", "analysis", "src"] # + "rust-demangler" if `profiler`
+#tools = ["cargo", "rls", "clippy", "rustfmt", "analysis", "src", "rustc-dev"] # + "rust-demangler" if `profiler`
 
 # Verbosity level: 0 == not verbose, 1 == verbose, 2 == very verbose
 #verbose = 0

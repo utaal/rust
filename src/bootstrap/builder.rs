@@ -519,6 +519,7 @@ impl<'a> Builder<'a> {
                 install::Rustfmt,
                 install::RustDemangler,
                 install::Clippy,
+                install::RustcDev,
                 install::Miri,
                 install::Analysis,
                 install::Src,
