@@ -76,3 +76,5 @@ package-lock.json
 src/test/rustdoc-gui/src/**.lock
 
 # Before adding new lines, see the comment at the top.
+# The following is the toolchain directory created with the config.toml.verify configuration:
+install/
