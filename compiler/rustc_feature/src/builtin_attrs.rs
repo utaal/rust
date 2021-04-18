@@ -351,6 +351,15 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     gated!(cmse_nonsecure_entry, AssumedUsed, template!(Word), experimental!(cmse_nonsecure_entry)),
 
     // ==========================================================================
+    // Formal verifier attributes:
+    // ==========================================================================
+
+    ungated!(exec, AssumedUsed, template!(Word)),
+    ungated!(proof, AssumedUsed, template!(Word)),
+    ungated!(spec, AssumedUsed, template!(Word)),
+    ungated!(trigger, AssumedUsed, template!(Word, List: "integer_multiple_trigger_group, ...")),
+
+    // ==========================================================================
     // Internal attributes: Stability, deprecation, and unsafe:
     // ==========================================================================
 
