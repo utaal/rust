@@ -595,6 +595,7 @@ symbols! {
         except,
         exchange_malloc,
         exclusive_range_pattern,
+        exec, // formal verifier symbol
         exhaustive_integer_patterns,
         exhaustive_patterns,
         existential_type,
@@ -1007,6 +1008,7 @@ symbols! {
         proc_macro_path_invoc,
         profiler_builtins,
         profiler_runtime,
+        proof, // formal verifier symbol
         ptr_guaranteed_eq,
         ptr_guaranteed_ne,
         ptr_null,
@@ -1249,6 +1251,7 @@ symbols! {
         slice_u8_alloc,
         slicing_syntax,
         soft,
+        spec, // formal verifier symbol
         specialization,
         speed,
         spotlight,
@@ -1330,6 +1333,7 @@ symbols! {
         transparent,
         transparent_enums,
         transparent_unions,
+        trigger, // formal verifier symbol
         trivial_bounds,
         truncf32,
         truncf64,
