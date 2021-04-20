@@ -673,6 +673,7 @@ symbols! {
         from_size_align_unchecked,
         from_usize,
         fsub_fast,
+        fuel, // formal verifier symbol
         fundamental,
         future,
         future_trait,
