@@ -217,6 +217,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             _ => self.check_expr_kind(expr, expected),
         });
 
+        // formal verifier
+        let ty = self.tcx.formal_verifier_coerce_type(expr, ty, &expected.to_option(self));
+
         // Warn for non-block expressions with diverging children.
         match expr.kind {
             ExprKind::Block(..)

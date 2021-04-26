@@ -66,6 +66,7 @@ impl ToType for ty::IntVarValue {
         match *self {
             ty::IntType(i) => tcx.mk_mach_int(i),
             ty::UintType(i) => tcx.mk_mach_uint(i),
+            ty::InfiniteRange(s) => tcx.mk_infinite_range(s),
         }
     }
 }

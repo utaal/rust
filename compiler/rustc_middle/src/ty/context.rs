@@ -972,6 +972,76 @@ impl<'tcx> Deref for TyCtxt<'tcx> {
     }
 }
 
+pub trait FormalVerifierTyping {
+    fn coerce_type<'tcx>(
+        &mut self,
+        tcx: TyCtxt<'tcx>,
+        expr: &'tcx hir::Expr<'tcx>,
+        ty: Ty<'tcx>,
+        expected_ty: &Option<Ty<'tcx>>,
+    ) -> Ty<'tcx>;
+
+    fn cast_type<'tcx>(&mut self, tcx: TyCtxt<'tcx>, t_expr: Ty<'tcx>, t_cast: Ty<'tcx>) -> bool;
+    fn is_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> bool;
+    fn str_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> &'static str;
+    fn mk_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, name: &'static str) -> Ty<'tcx>;
+}
+
+pub type FormalVerifierTypingCell =
+    Lrc<std::cell::RefCell<Option<Box<dyn FormalVerifierTyping + sync::Sync + sync::Send>>>>;
+
+impl TyCtxt<'tcx> {
+    pub fn formal_verifier_coerce_type(
+        self,
+        expr: &'tcx hir::Expr<'tcx>,
+        ty: Ty<'tcx>,
+        expected_ty: &Option<Ty<'tcx>>,
+    ) -> Ty<'tcx> {
+        match &mut *(self.formal_verifier_callback.borrow_mut()) {
+            None => ty,
+            Some(formal_verifier) => {
+                formal_verifier.coerce_type(self, expr, ty, expected_ty)
+            }
+        }
+    }
+
+    pub fn formal_verifier_cast_type(self, t_expr: Ty<'tcx>, t_cast: Ty<'tcx>) -> bool {
+        match &mut *(self.formal_verifier_callback.borrow_mut()) {
+            None => false,
+            Some(formal_verifier) => {
+                formal_verifier.cast_type(self, t_expr, t_cast)
+            }
+        }
+    }
+
+    pub fn is_infinite_range(self, ty: Ty<'tcx>) -> bool {
+        match &mut *(self.formal_verifier_callback.borrow_mut()) {
+            None => false,
+            Some(formal_verifier) => {
+                formal_verifier.is_infinite_range(self, ty)
+            }
+        }
+    }
+
+    pub fn str_infinite_range(self, ty: Ty<'tcx>) -> &'static str {
+        match &mut *(self.formal_verifier_callback.borrow_mut()) {
+            None => panic!("formal_verifier_callback not available"),
+            Some(formal_verifier) => {
+                formal_verifier.str_infinite_range(self, ty)
+            }
+        }
+    }
+
+    pub fn mk_infinite_range(self, name: &'static str) -> Ty<'tcx> {
+        match &mut *(self.formal_verifier_callback.borrow_mut()) {
+            None => panic!("formal_verifier_callback not available"),
+            Some(formal_verifier) => {
+                formal_verifier.mk_infinite_range(self, name)
+            }
+        }
+    }
+}
+
 pub struct GlobalCtxt<'tcx> {
     pub arena: &'tcx WorkerLocal<Arena<'tcx>>,
 
@@ -984,6 +1054,9 @@ pub struct GlobalCtxt<'tcx> {
     /// FIXME(Centril): consider `dyn LintStoreMarker` once
     /// we can upcast to `Any` for some additional type safety.
     pub lint_store: Lrc<dyn Any + sync::Sync + sync::Send>,
+
+    // formal verifier callback
+    pub formal_verifier_callback: FormalVerifierTypingCell,
 
     pub dep_graph: DepGraph,
 
@@ -1160,6 +1233,7 @@ impl<'tcx> TyCtxt<'tcx> {
         GlobalCtxt {
             sess: s,
             lint_store,
+            formal_verifier_callback: Lrc::new(std::cell::RefCell::new(None)),
             arena,
             interners,
             dep_graph,

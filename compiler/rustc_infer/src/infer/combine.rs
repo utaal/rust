@@ -41,7 +41,7 @@ use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::relate::{self, Relate, RelateResult, TypeRelation};
 use rustc_middle::ty::subst::SubstsRef;
 use rustc_middle::ty::{self, InferConst, ToPredicate, Ty, TyCtxt, TypeFoldable};
-use rustc_middle::ty::{IntType, UintType};
+use rustc_middle::ty::{IntType, UintType, InfiniteRange};
 use rustc_span::{Span, DUMMY_SP};
 
 #[derive(Clone)]
@@ -93,6 +93,14 @@ impl<'infcx, 'tcx> InferCtxt<'infcx, 'tcx> {
             }
             (&ty::Uint(v), &ty::Infer(ty::IntVar(v_id))) => {
                 self.unify_integral_variable(!a_is_expected, v_id, UintType(v))
+            }
+            (&ty::Infer(ty::IntVar(v_id)), &ty::Adt(_, _)) if self.tcx.is_infinite_range(b) => {
+                let s = self.tcx.str_infinite_range(b);
+                self.unify_integral_variable(a_is_expected, v_id, InfiniteRange(s))
+            }
+            (&ty::Adt(_, _), &ty::Infer(ty::IntVar(v_id))) if self.tcx.is_infinite_range(a) => {
+                let s = self.tcx.str_infinite_range(a);
+                self.unify_integral_variable(!a_is_expected, v_id, InfiniteRange(s))
             }
 
             // Relate floating-point variables to other types
@@ -276,6 +284,7 @@ impl<'infcx, 'tcx> InferCtxt<'infcx, 'tcx> {
         match val {
             IntType(v) => Ok(self.tcx.mk_mach_int(v)),
             UintType(v) => Ok(self.tcx.mk_mach_uint(v)),
+            InfiniteRange(s) => Ok(self.tcx.mk_infinite_range(s)),
         }
     }
 
