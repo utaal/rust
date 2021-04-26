@@ -323,6 +323,7 @@ impl FloatTy {
 pub enum IntVarValue {
     IntType(IntTy),
     UintType(UintTy),
+    InfiniteRange(&'static str),
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -542,6 +543,7 @@ impl fmt::Debug for IntVarValue {
         match *self {
             IntVarValue::IntType(ref v) => v.fmt(f),
             IntVarValue::UintType(ref v) => v.fmt(f),
+            IntVarValue::InfiniteRange(s) => f.write_str(s),
         }
     }
 }

@@ -557,6 +557,11 @@ impl<'a, 'tcx> CastCheck<'tcx> {
 
         debug!("check_cast({}, {:?} as {:?})", self.expr.hir_id, self.expr_ty, self.cast_ty);
 
+        // formal verifier
+        if fcx.tcx.formal_verifier_cast_type(self.expr_ty, self.cast_ty) {
+            return;
+        }
+
         if !fcx.type_is_known_to_be_sized_modulo_regions(self.cast_ty, self.span) {
             self.report_cast_to_unsized_type(fcx);
         } else if self.expr_ty.references_error() || self.cast_ty.references_error() {

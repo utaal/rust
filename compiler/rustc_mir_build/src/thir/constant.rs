@@ -46,6 +46,9 @@ crate fn lit_to_const<'tcx>(
         (ast::LitKind::Int(n, _), ty::Uint(_)) | (ast::LitKind::Int(n, _), ty::Int(_)) => {
             trunc(if neg { (*n as i128).overflowing_neg().0 as u128 } else { *n })?
         }
+        (ast::LitKind::Int(n, _), ty::Adt(_, _)) if tcx.is_infinite_range(ty) && !neg => {
+            ConstValue::Scalar(Scalar::from_uint(*n, Size::from_bytes(16)))
+        }
         (ast::LitKind::Float(n, _), ty::Float(fty)) => {
             parse_float(*n, *fty, neg).map_err(|_| LitToConstError::UnparseableFloat)?
         }
