@@ -9,7 +9,7 @@ use crate::util::{
 };
 use crate::{unsupported, unsupported_err, unsupported_err_unless, unsupported_unless};
 use air::ast::{Binder, BinderX, Quant};
-use rustc_ast::{Attribute, LitKind};
+use rustc_ast::{Attribute, BorrowKind, LitKind};
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::{
     Arm, BinOpKind, BindingAnnotation, Block, Destination, Expr, ExprKind, Local, LoopSource,
@@ -745,6 +745,21 @@ pub(crate) fn expr_to_vir_inner<'tcx>(
                     .collect::<Result<Vec<_>, _>>()?,
             );
             Ok(spanned_new(expr.span, ExprX::Ctor(path, variant_name, vir_fields)))
+        }
+        ExprKind::AddrOf(borrow_kind, is_mut, rhs) => {
+            unsupported_err_unless!(borrow_kind == &BorrowKind::Ref, expr.span, "raw borrow", expr);
+            unsupported_err_unless!(
+                is_mut == &rustc_middle::mir::Mutability::Not,
+                expr.span,
+                "mutable references",
+                expr
+            );
+            // TODO is this a terrible idea?
+            //      this pretends immutable references don't exist, and are just the same type as
+            //      the pointee and are assigned the value of the pointee
+            //      this may be sound for types with structural equality and no interior
+            //      mutability, but it's definitely broken for the latter
+            expr_to_vir(ctxt, rhs)
         }
         _ => {
             unsupported_err!(expr.span, format!("expression"), expr)

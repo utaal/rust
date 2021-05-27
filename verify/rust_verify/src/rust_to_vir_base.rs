@@ -280,6 +280,19 @@ pub(crate) fn mid_ty_to_vir<'tcx>(tcx: TyCtxt<'tcx>, ty: rustc_middle::ty::Ty) -
         }
         TyKind::Uint(_) | TyKind::Int(_) => TypX::Int(mk_range(ty)),
         TyKind::Param(param) => TypX::TypParam(Arc::new(param.name.to_string())),
+        TyKind::Ref(_region, ref_ty, is_mut) => {
+            unsupported_unless!(
+                is_mut == &rustc_middle::mir::Mutability::Not,
+                "mutable references",
+                ty
+            );
+            // TODO is this a terrible idea?
+            //      this pretends immutable references don't exist, and are just the same type as
+            //      the pointee
+            //      this may be sound for types with structural equality and no interior
+            //      mutability, but it's definitely broken for the latter
+            mid_ty_to_vir(tcx, ref_ty)
+        }
         _ => {
             unsupported!(format!("type {:?}", ty))
         }
