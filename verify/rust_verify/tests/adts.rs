@@ -4,13 +4,13 @@ mod common;
 use common::*;
 
 const STRUCTS: &str = code_str! {
-    #[derive(PartialEq, Eq)]
+    #[derive(PartialEq, Eq, SmtEq)]
     struct Car {
         four_doors: bool,
         passengers: int,
     }
 
-    #[derive(PartialEq, Eq)]
+    #[derive(PartialEq, Eq, SmtEq)]
     enum Vehicle {
         Car(Car),
         Train(bool),
@@ -51,6 +51,14 @@ test_verify_with_pervasive! {
     #[test] test_struct_4 STRUCTS.to_string() + code_str! {
         fn test_struct_4(passengers: int) {
             assert((Car { passengers, four_doors: true }).passengers == passengers);
+        }
+    } => Ok(())
+}
+
+test_verify_with_pervasive! {
+    #[test] test_struct_5 STRUCTS.to_string() + code_str! {
+        fn test_struct_5(passengers: int) {
+            assert((Car { passengers, four_doors: true }) == (Car { passengers, four_doors: true }));
         }
     } => Ok(())
 }

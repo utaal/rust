@@ -49,6 +49,11 @@ pub fn exists<A>(_a: A) -> bool {
     unimplemented!();
 }
 
+#[rustc_diagnostic_item = "builtin::SmtEq"]
+pub unsafe trait SmtEq: std::cmp::Eq { }
+
+unsafe impl SmtEq for bool { }
+
 #[allow(non_camel_case_types)]
 pub struct int;
 
@@ -100,6 +105,8 @@ impl std::cmp::Ord for int {
     }
 }
 
+unsafe impl SmtEq for int { }
+
 #[allow(non_camel_case_types)]
 pub struct nat;
 
@@ -144,6 +151,8 @@ impl std::cmp::Ord for nat {
     }
 }
 
+unsafe impl SmtEq for nat { }
+
 // TODO(andreal) bake this into the compiler as a lang_item
 #[rustc_diagnostic_item = "builtin::Structural"]
 pub trait Structural {
@@ -171,3 +180,5 @@ impl_structural! {
     // TODO: support f32 f64 ?
     bool char
 }
+
+
