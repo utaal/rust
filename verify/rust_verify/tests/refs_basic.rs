@@ -16,12 +16,13 @@ test_verify_with_pervasive! {
 
 test_verify_with_pervasive! {
     #[test] test_struct_ref code! {
-        struct Thing { a: int }
+        #[derive(PartialEq, Eq, SmtEq)]
+        struct Thing { a: int, b: bool }
 
-        fn struct_ref(v: int) {
-            let t = Thing { a: v };
+        fn struct_ref() {
+            let t = Thing { a: 12, b: true };
             let a_ref = &t.a;
-            assert(a_ref == &v);
+            assert(a_ref == &12);
         }
     } => Ok(())
 }

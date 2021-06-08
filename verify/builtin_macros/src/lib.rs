@@ -26,3 +26,11 @@ fn derive_structural(s: synstructure::Structure) -> proc_macro2::TokenStream {
         }
     })
 }
+
+decl_derive!([SmtEq] => derive_smteq);
+
+fn derive_smteq(s: synstructure::Structure) -> proc_macro2::TokenStream {
+    s.gen_impl(quote! {
+        gen unsafe impl builtin::SmtEq for @Self { }
+    })
+}
