@@ -1413,6 +1413,7 @@ symbols! {
         var,
         variant_count,
         vec,
+        verifier, // formal verifier symbol
         version,
         vis,
         visible_private_types,

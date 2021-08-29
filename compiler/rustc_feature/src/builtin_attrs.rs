@@ -463,6 +463,7 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     ungated!(trigger, AssumedUsed, template!(Word, List: "integer_multiple_trigger_group, ...")),
     ungated!(opaque, AssumedUsed, template!(Word)),
     ungated!(fuel, AssumedUsed, template!(List: "integer_fuel")),
+    ungated!(verifier, AssumedUsed, template!(List: "verifier configuration options, ...")),
 
     // ==========================================================================
     // Internal attributes: Stability, deprecation, and unsafe:
