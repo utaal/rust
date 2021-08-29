@@ -1282,6 +1282,7 @@ symbols! {
         vec,
         vec_type,
         vecdeque_type,
+        verifier, // formal verifier symbol
         version,
         vis,
         visible_private_types,
