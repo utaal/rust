@@ -48,6 +48,13 @@ use std::cell::Cell;
 use std::iter;
 use std::slice;
 
+pub trait FormalVerifierRewrite {
+    fn rewrite_crate(&mut self, c: &ast::Crate) -> ast::Crate;
+}
+
+pub type FormalVerifierRewriteCell =
+    sync::Lrc<std::cell::RefCell<Option<Box<dyn FormalVerifierRewrite + sync::Sync + sync::Send>>>>;
+
 /// Information about the registered lints.
 ///
 /// This is basically the subset of `Context` that we can
@@ -73,6 +80,9 @@ pub struct LintStore {
 
     /// Map of registered lint groups to what lints they expand to.
     lint_groups: FxHashMap<&'static str, LintGroup>,
+
+    // formal verifier callback
+    pub formal_verifier_callback: FormalVerifierRewriteCell,
 }
 
 /// The target of the `by_name` map, which accounts for renaming/deprecation.
@@ -138,6 +148,7 @@ impl LintStore {
             late_module_passes: vec![],
             by_name: Default::default(),
             lint_groups: Default::default(),
+            formal_verifier_callback: sync::Lrc::new(std::cell::RefCell::new(None)),
         }
     }
 

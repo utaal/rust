@@ -473,6 +473,20 @@ pub fn lower_to_hir<'res, 'tcx>(
     krate: Rc<ast::Crate>,
     arena: &'tcx rustc_ast_lowering::Arena<'tcx>,
 ) -> &'tcx Crate<'tcx> {
+    // We're constructing the HIR here; we don't care what we will
+    // read, since we haven't even constructed the *input* to
+    // incr. comp. yet.
+    dep_graph.assert_ignored();
+
+    // Let formal verifier rewrite AST
+    let krate_rewrite = match &mut *(lint_store.formal_verifier_callback.borrow_mut()) {
+        None => None,
+        Some(formal_verifier) => {
+            Some(formal_verifier.rewrite_crate(&krate))
+        }
+    };
+    let krate = krate_rewrite.as_ref().unwrap_or(&krate);
+
     // Lower AST to HIR.
     let hir_crate = rustc_ast_lowering::lower_crate(
         sess,
