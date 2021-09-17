@@ -208,7 +208,7 @@ pub enum ExprX {
     /// Assign to local variable
     Assign(Expr, Expr),
     /// Reveal definition of an opaque function with some integer fuel amount
-    Fuel(Ident, u32),
+    Fuel(Path, u32),
     /// Header, which must appear at the beginning of a function or while loop.
     /// Note: this only appears temporarily during rust_to_vir construction, and should not
     /// appear in the final Expr produced by rust_to_vir (see vir::headers::read_header).

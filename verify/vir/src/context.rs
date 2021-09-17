@@ -1,4 +1,4 @@
-use crate::ast::{Function, Ident, Krate, Mode, Path, Variants, VirErr};
+use crate::ast::{Function, Krate, Mode, Path, Variants, VirErr};
 use crate::def::FUEL_ID;
 use crate::scc::Graph;
 use crate::sst_to_air::path_to_air_ident;
@@ -11,7 +11,7 @@ pub struct Ctx {
     pub(crate) datatypes: HashMap<Path, Variants>,
     pub(crate) functions: Vec<Function>,
     pub(crate) func_map: HashMap<Path, Function>,
-    pub(crate) func_call_graph: Graph<Ident>,
+    pub(crate) func_call_graph: Graph<Path>,
     pub(crate) chosen_triggers: std::cell::RefCell<Vec<(Span, Vec<Vec<String>>)>>, // diagnostics
     pub(crate) debug: bool,
 }
@@ -25,7 +25,7 @@ impl Ctx {
             .collect::<HashMap<_, _>>();
         let mut functions: Vec<Function> = Vec::new();
         let mut func_map: HashMap<Path, Function> = HashMap::new();
-        let mut func_call_graph: Graph<Ident> = Graph::new();
+        let mut func_call_graph: Graph<Path> = Graph::new();
         for function in krate.functions.iter() {
             func_map.insert(function.x.path.clone(), function.clone());
             crate::recursion::expand_call_graph(&mut func_call_graph, function)?;

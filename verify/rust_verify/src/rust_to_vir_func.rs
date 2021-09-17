@@ -51,7 +51,7 @@ pub(crate) fn check_item_fn<'tcx>(
     ctxt: &Context<'tcx>,
     vir: &mut KrateX,
     self_path: Option<&'tcx rustc_hir::Path<'tcx>>,
-    id: &ItemId,
+    id: &rustc_hir::ItemId,
     visibility: vir::ast::Visibility,
     attrs: &[Attribute],
     sig: &'tcx FnSig<'tcx>,

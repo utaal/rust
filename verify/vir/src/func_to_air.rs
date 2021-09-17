@@ -210,7 +210,7 @@ pub fn func_name_to_air(ctx: &Ctx, function: &Function) -> Result<Commands, VirE
         if let Some(body) = &function.x.body {
             let body_exp = crate::ast_to_sst::expr_to_exp(&ctx, &body)?;
             if crate::recursion::is_recursive_exp(ctx, &function.x.path, &body_exp) {
-                let rec_f = suffix_global_id(&prefix_recursive(&function.x.name));
+                let rec_f = suffix_global_id(&prefix_recursive(&path_to_air_ident(&function.x.path)));
                 let mut rec_typs =
                     vec_map(&*function.x.params, |param| typ_to_air(ctx, &param.x.typ));
                 rec_typs.push(str_typ(FUEL_TYPE));
@@ -233,7 +233,7 @@ pub fn func_decl_to_air(ctx: &Ctx, function: &Function) -> Result<(Commands, Com
     let mut check_commands: Vec<Command> = Vec::new();
     match (function.x.mode, function.x.ret.as_ref()) {
         (Mode::Spec, Some((_, ret, _))) => {
-            let name = suffix_global_id(&function.x.name);
+            let name = suffix_global_id(&path_to_air_ident(&function.x.path));
 
             // Body
             if let Some(body) = &function.x.body {
@@ -274,7 +274,7 @@ pub fn func_decl_to_air(ctx: &Ctx, function: &Function) -> Result<(Commands, Com
                 &function.x.require,
                 &function.x.typ_params,
                 &param_typs,
-                &prefix_requires(&function.x.name),
+                &prefix_requires(&path_to_air_ident(&function.x.path)),
                 &msg,
             )?;
             let mut ens_typs = (*param_typs).clone();
@@ -296,7 +296,7 @@ pub fn func_decl_to_air(ctx: &Ctx, function: &Function) -> Result<(Commands, Com
                 &function.x.ensure,
                 &function.x.typ_params,
                 &Arc::new(ens_typs),
-                &prefix_ensures(&function.x.name),
+                &prefix_ensures(&path_to_air_ident(&function.x.path)),
                 &None,
             )?;
         }

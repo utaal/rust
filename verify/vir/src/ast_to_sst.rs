@@ -184,7 +184,7 @@ pub(crate) fn expr_to_stm_opt(
             let (mut stms, x, typs, ret, args) = expr_get_call(ctx, state, expr)?.expect("Call");
             if function_can_be_exp(ctx, expr, &x)? {
                 // ExpX::Call
-                let call = ExpX::Call(x.clone(), typs.clone(), args);
+                let call = ExpX::Call(false, x.clone(), typs.clone(), args);
                 Ok((stms, Some(Spanned::new(expr.span.clone(), call))))
             } else if ret {
                 let temp = state.next_temp();

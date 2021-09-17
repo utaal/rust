@@ -28,7 +28,7 @@ pub enum ExpX {
     Const(Constant),
     Var(Ident),
     Old(Ident, Ident),       // used only during sst_to_air to generate AIR Old
-    Call(Path, Typs, Exps), // call to spec function
+    Call(/* recursive: */ bool, Path, Typs, Exps), // call to spec function
     Ctor(Path, Ident, Binders<Exp>),
     Field { lhs: Exp, datatype: Path, field_name: Ident },
     Unary(UnaryOp, Exp),
@@ -58,7 +58,7 @@ pub enum StmX {
         init: bool,
     },
     Assign(Exp, Exp),
-    Fuel(Ident, u32),
+    Fuel(Path, u32),
     If(Exp, Stm, Option<Stm>),
     While {
         cond: Exp,
