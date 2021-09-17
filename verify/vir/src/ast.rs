@@ -192,7 +192,7 @@ pub enum ExprX {
     /// Call to function with given name, passing some type arguments and some expression arguments
     /// TODO: should be Path, not Ident
     /// Note: higher-order functions aren't yet supported
-    Call(Ident, Typs, Exprs),
+    Call(Path, Typs, Exprs),
     /// Construct datatype value of type Path and variant Ident, with field initializers Binders<Expr>
     Ctor(Path, Ident, Binders<Expr>),
     /// Read field from datatype
@@ -248,8 +248,7 @@ pub struct ParamX {
 pub type Function = Arc<Spanned<FunctionX>>;
 #[derive(Debug, Clone)]
 pub struct FunctionX {
-    /// TODO: should be Path, not Ident
-    pub name: Ident,
+    pub path: Path,
     pub visibility: Visibility,
     /// exec functions are compiled, proof/spec are erased
     /// exec/proof functions can have requires/ensures, spec cannot

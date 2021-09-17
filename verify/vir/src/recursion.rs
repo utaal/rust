@@ -1,4 +1,4 @@
-use crate::ast::{BinaryOp, Constant, Function, Ident, Params, Typ, TypX, UnaryOp, VirErr};
+use crate::ast::{BinaryOp, Constant, Function, Ident, Params, Typ, TypX, UnaryOp, VirErr, Path};
 use crate::ast_util::err_str;
 use crate::ast_visitor::map_expr_visitor;
 use crate::context::Ctx;
@@ -167,7 +167,7 @@ fn terminates(ctxt: &Ctxt, exp: &Exp) -> Result<Exp, VirErr> {
     }
 }
 
-pub(crate) fn is_recursive_exp(ctx: &Ctx, name: &Ident, body: &Exp) -> bool {
+pub(crate) fn is_recursive_exp(ctx: &Ctx, name: &Path, body: &Exp) -> bool {
     if ctx.func_call_graph.get_scc_size(name) > 1 {
         // This function is part of a mutually recursive component
         true
@@ -185,7 +185,7 @@ pub(crate) fn is_recursive_exp(ctx: &Ctx, name: &Ident, body: &Exp) -> bool {
     }
 }
 
-pub(crate) fn is_recursive_stm(ctx: &Ctx, name: &Ident, body: &Stm) -> bool {
+pub(crate) fn is_recursive_stm(ctx: &Ctx, name: &Path, body: &Stm) -> bool {
     if ctx.func_call_graph.get_scc_size(name) > 1 {
         // This function is part of a mutually recursive component
         true

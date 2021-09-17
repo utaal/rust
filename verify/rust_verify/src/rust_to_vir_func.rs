@@ -50,7 +50,8 @@ fn check_fn_decl<'tcx>(
 pub(crate) fn check_item_fn<'tcx>(
     ctxt: &Context<'tcx>,
     vir: &mut KrateX,
-    id: Ident,
+    self_path: Option<&'tcx rustc_hir::Path<'tcx>>,
+    id: &ItemId,
     visibility: vir::ast::Visibility,
     attrs: &[Attribute],
     sig: &'tcx FnSig<'tcx>,
@@ -58,6 +59,7 @@ pub(crate) fn check_item_fn<'tcx>(
     body_id: &BodyId,
 ) -> Result<(), VirErr> {
     let name = Arc::new(ident_to_var(&id));
+    dbg!(&name);
     let mode = get_mode(Mode::Exec, attrs);
     let ret_typ_mode = match sig {
         FnSig {

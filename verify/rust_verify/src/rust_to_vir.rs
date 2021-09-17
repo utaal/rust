@@ -15,7 +15,7 @@ use crate::{err_unless, unsupported_err, unsupported_err_unless, unsupported_unl
 use rustc_ast::Attribute;
 use rustc_hir::{
     Crate, ForeignItem, ForeignItemId, ForeignItemKind, HirId, Item, ItemId, ItemKind, ModuleItems,
-    QPath, TraitRef, TyKind,
+    QPath, TraitRef, TyKind, AssocItemKind, ImplItemKind
 };
 use rustc_middle::ty::TyCtxt;
 use std::collections::HashMap;
@@ -35,6 +35,7 @@ fn check_item<'tcx>(
             check_item_fn(
                 ctxt,
                 vir,
+                None,
                 item.ident,
                 visibility,
                 ctxt.tcx.hir().attrs(item.hir_id()),
@@ -160,10 +161,33 @@ fn check_item<'tcx>(
                     item
                 );
                 match impll.self_ty.kind {
-                    TyKind::Path(QPath::Resolved(_, _path)) => {
-                        for impl_item in impll.items {
+                    TyKind::Path(QPath::Resolved(None, self_path)) => {
+                        for impl_item_ref in impll.items {
+                            match impl_item_ref.kind {
+                                AssocItemKind::Fn { has_self } if has_self => {
+                                    let impl_item = ctxt.tcx.hir().impl_item(impl_item_ref.id);
+                                    dbg!(impl_item);
+                                    match &impl_item.kind {
+                                        ImplItemKind::Fn(sig, body_id) =>  {
+                                            check_item_fn(
+                                                ctxt,
+                                                vir,
+                                                Some(self_path),
+                                                impl_item.ident,
+                                                visibility.clone(),
+                                                ctxt.tcx.hir().attrs(impl_item.hir_id()),
+                                                sig,
+                                                // TODO: make sure this is correct once supported
+                                                &impll.generics,
+                                                body_id,
+                                            )?;
+                                        }
+                                        _ => unsupported_err!(item.span, "unsupported item in impl", impl_item_ref)
+                                    }
+                                }
+                                _ => unsupported_err!(item.span, "unsupported item in impl", impl_item_ref)
+                            }
                             // TODO once we have references
-                            unsupported_err!(item.span, "unsupported method in impl", impl_item);
                         }
                     }
                     _ => {
@@ -202,6 +226,7 @@ fn check_module<'tcx>(
             unsupported_unless!(trait_items.len() == 0, "trait definitions", trait_items);
             for _id in impl_items {
                 // TODO?
+                dbg!(_id);
             }
             for _id in foreign_items {
                 // TODO
