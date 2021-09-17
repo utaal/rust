@@ -189,7 +189,7 @@ fn check_item<'tcx>(
 }
 
 fn check_module<'tcx>(
-    tcx: TyCtxt<'tcx>,
+    _tcx: TyCtxt<'tcx>,
     module_path: &Path,
     module_items: &'tcx ModuleItems,
     item_to_module: &mut HashMap<ItemId, Path>,
@@ -200,18 +200,8 @@ fn check_module<'tcx>(
                 item_to_module.insert(*item_id, module_path.clone());
             }
             unsupported_unless!(trait_items.len() == 0, "trait definitions", trait_items);
-            // TODO: deduplicate with crate_to_vir
-            for id in impl_items {
-                let def_name = hack_get_def_name(tcx, id.def_id.to_def_id());
-                // TODO: check whether these implement the correct trait
-                unsupported_unless!(
-                    def_name == "assert_receiver_is_total_eq"
-                        || def_name == "eq"
-                        || def_name == "ne"
-                        || def_name == "assert_receiver_is_structural",
-                    "impl definition in module",
-                    id
-                );
+            for _id in impl_items {
+                // TODO?
             }
             for _id in foreign_items {
                 // TODO
