@@ -181,16 +181,16 @@ fn record_fun(
     } else if is_compilable_operator {
         ResolvedCall::CompilableOperator
     } else {
-        ResolvedCall::Call(Arc::new(hack_get_def_name(ctxt.tcx, id)))
+        ResolvedCall::Call(def_id_to_vir_path(ctxt.tcx, id))
     };
     erasure_info.resolved_calls.push((span.data(), resolved_call));
 }
 
-fn get_fn_name<'tcx>(tcx: TyCtxt<'tcx>, expr: &Expr<'tcx>) -> Result<Ident, VirErr> {
+fn get_fn_path<'tcx>(tcx: TyCtxt<'tcx>, expr: &Expr<'tcx>) -> Result<vir::ast::Path, VirErr> {
     match &expr.kind {
         ExprKind::Path(QPath::Resolved(None, path)) => match path.res {
             Res::Def(DefKind::Fn, id) => {
-                Ok(Arc::new(hack_get_def_name(tcx, id))) // TODO: proper handling of paths
+                Ok(def_id_to_vir_path(tcx, id))
             }
             res => unsupported_err!(expr.span, format!("Path {:?}", res)),
         },
@@ -273,7 +273,7 @@ fn fn_call_to_vir<'tcx>(
 
     if is_hide || is_reveal {
         unsupported_err_unless!(len == 1, expr.span, "expected hide/reveal", &args);
-        let x = get_fn_name(tcx, &args[0])?;
+        let x = get_fn_path(tcx, &args[0])?;
         if is_hide {
             let header = Arc::new(HeaderExprX::Hide(x));
             return Ok(mk_expr(ExprX::Header(header)));
@@ -283,7 +283,7 @@ fn fn_call_to_vir<'tcx>(
     }
     if is_reveal_fuel {
         unsupported_err_unless!(len == 2, expr.span, "expected reveal_fuel", &args);
-        let x = get_fn_name(tcx, &args[0])?;
+        let x = get_fn_path(tcx, &args[0])?;
         match &expr_to_vir(bctx, &args[1])?.x {
             ExprX::Const(Constant::Nat(s)) => {
                 let n = s.parse::<u32>().expect(&format!("internal error: parse {}", s));
@@ -396,11 +396,10 @@ fn fn_call_to_vir<'tcx>(
             },
         };
         // make call
-        let name = hack_get_def_name(tcx, f); // TODO: proper handling of paths
         let mut call = spanned_typed_new(
             expr.span,
             &possibly_boxed_ret_typ,
-            ExprX::Call(Arc::new(name), Arc::new(typ_args), Arc::new(vir_args)),
+            ExprX::Call(def_id_to_vir_path(tcx, f), Arc::new(typ_args), Arc::new(vir_args)),
         );
         // unbox result if necessary
         if let Some(ret_typ) = ret_typ {

@@ -161,7 +161,7 @@ pub enum HeaderExprX {
     Decreases(Expr, Typ),
     /// Make a function f opaque (definition hidden) within the current function body.
     /// (The current function body can later reveal f in specific parts of the current function body if desired.)
-    Hide(Ident),
+    Hide(Path),
 }
 
 /// Primitive constant values
@@ -273,7 +273,7 @@ pub struct FunctionX {
     /// Custom error message to display when a pre-condition fails
     pub custom_req_err: Option<String>,
     /// List of functions that this function wants to view as opaque
-    pub hidden: Idents,
+    pub hidden: Arc<Vec<Path>>,
     /// For public spec functions, is_abstract == true means that the body is private
     /// even though the function is public
     pub is_abstract: bool,
