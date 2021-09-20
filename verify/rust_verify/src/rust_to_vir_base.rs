@@ -400,6 +400,7 @@ pub(crate) fn ty_to_vir<'tcx>(tcx: TyCtxt<'tcx>, ty: &Ty) -> Typ {
                 }
             }
             Res::Def(DefKind::Enum, def_id) => def_id_to_ty_path(tcx, def_id),
+            Res::SelfTy(None, Some((impl_def_id, false))) => def_id_to_ty_path(tcx, impl_def_id),
             _ => {
                 unsupported!(format!("type {:#?} {:?} {:?}", kind, path.res, span))
             }

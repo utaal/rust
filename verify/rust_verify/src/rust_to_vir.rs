@@ -15,7 +15,7 @@ use crate::{err_unless, unsupported_err, unsupported_err_unless, unsupported_unl
 use rustc_ast::Attribute;
 use rustc_hir::{
     Crate, ForeignItem, ForeignItemId, ForeignItemKind, HirId, Item,
-    ItemId, ItemKind, ModuleItems, QPath, TraitRef, TyKind,
+    ItemId, ItemKind, ModuleItems, QPath, TraitRef, TyKind, AssocItemKind, ImplItemKind
 };
 use rustc_middle::ty::TyCtxt;
 use std::collections::HashMap;
@@ -161,10 +161,32 @@ fn check_item<'tcx>(
                     item
                 );
                 match impll.self_ty.kind {
-                    TyKind::Path(QPath::Resolved(_, _path)) => {
-                        for impl_item in impll.items {
+                    TyKind::Path(QPath::Resolved(None, self_path)) => {
+                        for impl_item_ref in impll.items {
+                            match impl_item_ref.kind {
+                                AssocItemKind::Fn { has_self } if has_self => {
+                                    let impl_item = ctxt.tcx.hir().impl_item(impl_item_ref.id);
+                                    match &impl_item.kind {
+                                        ImplItemKind::Fn(sig, body_id) =>  {
+                                            check_item_fn(
+                                                ctxt,
+                                                vir,
+                                                Some(self_path),
+                                                impl_item.def_id.to_def_id(),
+                                                visibility.clone(),
+                                                ctxt.tcx.hir().attrs(impl_item.hir_id()),
+                                                sig,
+                                                // TODO: make sure this is correct once supported
+                                                &impll.generics,
+                                                body_id,
+                                            )?;
+                                        }
+                                        _ => unsupported_err!(item.span, "unsupported item in impl", impl_item_ref)
+                                    }
+                                }
+                                _ => unsupported_err!(item.span, "unsupported item in impl", impl_item_ref)
+                            }
                             // TODO once we have references
-                            unsupported_err!(item.span, "unsupported method in impl", impl_item);
                         }
                     }
                     _ => {
@@ -290,16 +312,21 @@ pub fn crate_to_vir<'tcx>(ctxt: &Context<'tcx>) -> Result<Krate, VirErr> {
     }
     unsupported_unless!(trait_items.len() == 0, "trait definitions", trait_items);
     for (_id, impl_item) in impl_items {
-        let impl_item_ident = impl_item.ident.as_str();
-        // TODO: check whether these implement the correct trait
-        unsupported_unless!(
-            impl_item_ident == "assert_receiver_is_total_eq"
-                || impl_item_ident == "eq"
-                || impl_item_ident == "ne"
-                || impl_item_ident == "assert_receiver_is_structural",
-            "impl definition",
-            impl_item
-        );
+        match impl_item.kind {
+            ImplItemKind::Fn(_, _) => {
+                let impl_item_ident = impl_item.ident.as_str();
+                if impl_item_ident == "assert_receiver_is_total_eq"
+                        || impl_item_ident == "eq"
+                        || impl_item_ident == "ne"
+                        || impl_item_ident == "assert_receiver_is_structural" {
+                    // TODO: check whether these implement the correct trait if
+                }
+            }
+            _ => {
+                unsupported_err!(impl_item.span, "unsupported_impl_item", impl_item);
+            }
+        }
+
     }
     for (id, _trait_impl) in trait_impls {
         unsupported_unless!(

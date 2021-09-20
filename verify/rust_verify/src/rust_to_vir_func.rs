@@ -36,6 +36,8 @@ fn check_fn_decl<'tcx>(
     unsupported_unless!(!c_variadic, "c_variadic");
     match implicit_self {
         rustc_hir::ImplicitSelfKind::None => {}
+        rustc_hir::ImplicitSelfKind::Imm => {}
+        rustc_hir::ImplicitSelfKind::ImmRef => {}
         _ => unsupported!("implicit_self"),
     }
     match output {
@@ -59,6 +61,7 @@ pub(crate) fn check_item_fn<'tcx>(
     body_id: &BodyId,
 ) -> Result<(), VirErr> {
     let path = def_id_to_vir_path(ctxt.tcx, id);
+    dbg!(_self_path, &path);
     let mode = get_mode(Mode::Exec, attrs);
     let ret_typ_mode = match sig {
         FnSig {
@@ -84,6 +87,16 @@ pub(crate) fn check_item_fn<'tcx>(
     for (param, input) in params.iter().zip(sig.decl.inputs.iter()) {
         let Param { hir_id, pat, ty_span: _, span } = param;
         let name = Arc::new(pat_to_var(pat));
+        // TODO nocheckin eprintln!("### {:?}", input);
+        // TODO nocheckin match input.kind {
+        // TODO nocheckin     rustc_hir::TyKind::Path(rustc_hir::QPath::Resolved(None, path)) => match path.res {
+        // TODO nocheckin         rustc_hir::def::Res::SelfTy(trait_def_id, impl_def_id) => {
+        // TODO nocheckin             dbg!(trait_def_id, impl_def_id);
+        // TODO nocheckin         }
+        // TODO nocheckin         _ => {}
+        // TODO nocheckin     }
+        // TODO nocheckin     _ => {}
+        // TODO nocheckin }
         let typ = ty_to_vir(ctxt.tcx, input);
         let mode = get_var_mode(mode, ctxt.tcx.hir().attrs(*hir_id));
         let vir_param = spanned_new(*span, ParamX { name, typ, mode });
