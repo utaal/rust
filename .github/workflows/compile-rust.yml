@@ -27,6 +27,8 @@ jobs:
           mv install install_tmp
           cp -r install_tmp ~/local_bin
           mv ~/local_bin/install_tmp ~/local_bin/install
+          # restore name for upload artifact
+          mv install_tmp install
 
       # upload our rust binaries to github. 
       # When this ends, the binary can be downloaded at action tab of this github repository
