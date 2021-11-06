@@ -1,0 +1,40 @@
+name: build and upload binary of custom rust
+
+on: [push]   # to turn on CI on pull_request, change this to ->  on: [push, pull_request]
+
+jobs:
+  build_and_save:
+    # let's use a self-hosted linux runner at CMU server
+    runs-on: [self-hosted, linux]    
+    steps:
+      # make our repository available for github workflow
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # build our custom rust
+      # x.py will use "config.toml" for its configuration
+      # if you want to update our rust compile configuration, 
+      # make changes at config.toml.verify, not config.toml
+      # this yml file assumes 
+      # prefix = "install" in config.toml.verify 
+      # (search "General install configuration options", "[install]" for more information in config.toml file)
+      - name: build and install
+        run: |  
+          cp config.toml.verify config.toml
+          python x.py install   
+          # to minimize the chance of race between two CI (rust, verus), 
+          # instead of just "cp -r install ~/local_bin", do below three lines
+          mv install install_tmp
+          cp -r install_tmp ~/local_bin
+          mv ~/local_bin/install_tmp ~/local_bin/install
+
+      # upload our rust binaries to github. 
+      # When this ends, the binary can be downloaded at action tab of this github repository
+      # it is available for 90 days under default setup
+      - name: upload rust binary to github
+        uses: actions/upload-artifact@v2
+        with:
+          name: rust-bin-lib-etc
+          path: |
+            install      
+
