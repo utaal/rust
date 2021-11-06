@@ -22,12 +22,14 @@ jobs:
         run: |  
           cp config.toml.verify config.toml
           python x.py install   
-          # to minimize the chance of race between two CI (rust, verus), 
-          # instead of just "cp -r install ~/local_bin", do below three lines
+          # to minimize the window of race between two CI (rust, verus), 
+          # instead of just "cp -r install ~/local_bin", do below lines
           mv install install_tmp
           cp -r install_tmp ~/local_bin
+          mv ~/local_bin/install ~/local_bin/install_old
           mv ~/local_bin/install_tmp ~/local_bin/install
-          # restore name for upload artifact
+          rm -r ~/local_bin/install_old
+          # restore name for upload-artifact
           mv install_tmp install
 
       # upload our rust binaries to github. 
