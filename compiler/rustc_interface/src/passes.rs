@@ -429,6 +429,14 @@ pub fn configure_and_expand(
         println!("{}", json::as_json(&krate));
     }
 
+    // Let formal verifier rewrite AST
+    let krate = match &mut *(lint_store.formal_verifier_callback.borrow_mut()) {
+        None => krate,
+        Some(formal_verifier) => {
+            formal_verifier.rewrite_crate(&krate, &mut || resolver.next_node_id())
+        }
+    };
+
     resolver.resolve_crate(&krate);
 
     // Needs to go *after* expansion to be able to check the results of macro expansion.
@@ -477,15 +485,6 @@ pub fn lower_to_hir<'res, 'tcx>(
     // read, since we haven't even constructed the *input* to
     // incr. comp. yet.
     dep_graph.assert_ignored();
-
-    // Let formal verifier rewrite AST
-    let krate_rewrite = match &mut *(lint_store.formal_verifier_callback.borrow_mut()) {
-        None => None,
-        Some(formal_verifier) => {
-            Some(formal_verifier.rewrite_crate(&krate))
-        }
-    };
-    let krate = krate_rewrite.as_ref().unwrap_or(&krate);
 
     // Lower AST to HIR.
     let hir_crate = rustc_ast_lowering::lower_crate(
