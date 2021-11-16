@@ -194,6 +194,18 @@ fn get_features(
         }
     }
 
+    // formal verifier:
+    for feature in &sess.opts.debugging_opts.enable_feature {
+        let name = rustc_span::symbol::Ident::from_str(feature);
+        if features.declared_lang_features.iter().find(|(x, _, _)| *x == name.name).is_none() {
+            if let Some(f) = ACTIVE_FEATURES.iter().find(|f| name.name == f.name) {
+                f.set(&mut features, name.span);
+                features.declared_lang_features.push((name.name, name.span, None));
+                continue;
+            }
+        }
+    }
+
     features
 }
 

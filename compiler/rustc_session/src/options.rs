@@ -1128,6 +1128,9 @@ options! {
         "emits a future-incompatibility report for lints (RFC 2834)"),
     emit_stack_sizes: bool = (false, parse_bool, [UNTRACKED],
         "emit a section containing stack size metadata (default: no)"),
+    // formal verifier:
+    enable_feature: Vec<String> = (Vec::new(), parse_string_push, [TRACKED],
+        "enable the specified language feature"),
     fewer_names: Option<bool> = (None, parse_opt_bool, [TRACKED],
         "reduce memory use by retaining fewer names within compilation artifacts (LLVM-IR) \
         (default: no)"),
