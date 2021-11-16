@@ -76,7 +76,7 @@ pub struct LintStore {
 
     // formal verifier callback
     pub formal_verifier_callback: sync::Lrc<
-        std::cell::RefCell<Option<Box<dyn crate::FormalVerifierRewrite + sync::Sync + sync::Send>>>
+        std::cell::RefCell<Option<Box<dyn crate::FormalVerifierRewrite + sync::Sync + sync::Send>>>,
     >,
 }
 

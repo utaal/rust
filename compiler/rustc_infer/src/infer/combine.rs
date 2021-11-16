@@ -41,7 +41,7 @@ use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::relate::{self, Relate, RelateResult, TypeRelation};
 use rustc_middle::ty::subst::SubstsRef;
 use rustc_middle::ty::{self, InferConst, ToPredicate, Ty, TyCtxt, TypeFoldable};
-use rustc_middle::ty::{IntType, UintType, InfiniteRange};
+use rustc_middle::ty::{InfiniteRange, IntType, UintType};
 use rustc_span::{Span, DUMMY_SP};
 
 #[derive(Clone)]

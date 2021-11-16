@@ -64,7 +64,6 @@ pub use self::context::{
     tls, CanonicalUserType, CanonicalUserTypeAnnotation, CanonicalUserTypeAnnotations,
     CtxtInterners, DelaySpanBugEmitted, FreeRegionInfo, GeneratorInteriorTypeCause, GlobalCtxt,
     Lift, OnDiskCache, TyCtxt, TypeckResults, UserType, UserTypeAnnotationIndex,
-    FormalVerifierTyping,
 };
 pub use self::instance::{Instance, InstanceDef};
 pub use self::list::List;
@@ -276,6 +275,37 @@ pub trait DefIdTree: Copy {
         true
     }
 }
+
+pub trait FormalVerifierTyping {
+    fn coerce_type<'tcx>(
+        &mut self,
+        tcx: TyCtxt<'tcx>,
+        expr: &'tcx hir::Expr<'tcx>,
+        ty: Ty<'tcx>,
+        expected_ty: &Option<Ty<'tcx>>,
+    ) -> Ty<'tcx>;
+
+    // Some((false, ty)) means widen rhs to lhs_ty and then return ty
+    // Some((true, ty)) means widen lhs to rhs_ty and then return ty
+    fn widen_binary_types<'tcx>(
+        &mut self,
+        tcx: TyCtxt<'tcx>,
+        op: hir::BinOp,
+        lhs_expr: &'tcx hir::Expr<'tcx>,
+        rhs_expr: &'tcx hir::Expr<'tcx>,
+        lhs_ty: Ty<'tcx>,
+        rhs_ty: Ty<'tcx>,
+    ) -> Option<(bool, Ty<'tcx>)>;
+
+    fn cast_type<'tcx>(&mut self, tcx: TyCtxt<'tcx>, t_expr: Ty<'tcx>, t_cast: Ty<'tcx>) -> bool;
+    fn is_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> bool;
+    fn str_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> &'static str;
+    fn mk_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, name: &'static str) -> Ty<'tcx>;
+}
+
+pub type FormalVerifierTypingCell = rustc_data_structures::sync::Lrc<
+    std::cell::RefCell<Option<Box<dyn FormalVerifierTyping + sync::Sync + sync::Send>>>,
+>;
 
 impl<'tcx> DefIdTree for TyCtxt<'tcx> {
     fn parent(self, id: DefId) -> Option<DefId> {

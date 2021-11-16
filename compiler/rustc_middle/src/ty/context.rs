@@ -972,36 +972,6 @@ impl<'tcx> Deref for TyCtxt<'tcx> {
     }
 }
 
-pub trait FormalVerifierTyping {
-    fn coerce_type<'tcx>(
-        &mut self,
-        tcx: TyCtxt<'tcx>,
-        expr: &'tcx hir::Expr<'tcx>,
-        ty: Ty<'tcx>,
-        expected_ty: &Option<Ty<'tcx>>,
-    ) -> Ty<'tcx>;
-
-    // Some((false, ty)) means widen rhs to lhs_ty and then return ty
-    // Some((true, ty)) means widen lhs to rhs_ty and then return ty
-    fn widen_binary_types<'tcx>(
-        &mut self,
-        tcx: TyCtxt<'tcx>,
-        op: hir::BinOp, 
-        lhs_expr: &'tcx hir::Expr<'tcx>,
-        rhs_expr: &'tcx hir::Expr<'tcx>,
-        lhs_ty: Ty<'tcx>,
-        rhs_ty: Ty<'tcx>,
-    ) -> Option<(bool, Ty<'tcx>)>;
-
-    fn cast_type<'tcx>(&mut self, tcx: TyCtxt<'tcx>, t_expr: Ty<'tcx>, t_cast: Ty<'tcx>) -> bool;
-    fn is_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> bool;
-    fn str_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> &'static str;
-    fn mk_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, name: &'static str) -> Ty<'tcx>;
-}
-
-pub type FormalVerifierTypingCell =
-    Lrc<std::cell::RefCell<Option<Box<dyn FormalVerifierTyping + sync::Sync + sync::Send>>>>;
-
 impl TyCtxt<'tcx> {
     pub fn formal_verifier_coerce_type(
         self,
@@ -1011,15 +981,13 @@ impl TyCtxt<'tcx> {
     ) -> Ty<'tcx> {
         match &mut *(self.formal_verifier_callback.borrow_mut()) {
             None => ty,
-            Some(formal_verifier) => {
-                formal_verifier.coerce_type(self, expr, ty, expected_ty)
-            }
+            Some(formal_verifier) => formal_verifier.coerce_type(self, expr, ty, expected_ty),
         }
     }
 
     pub fn widen_binary_types(
         self,
-        op: hir::BinOp, 
+        op: hir::BinOp,
         lhs_expr: &'tcx hir::Expr<'tcx>,
         rhs_expr: &'tcx hir::Expr<'tcx>,
         lhs_ty: Ty<'tcx>,
@@ -1036,36 +1004,28 @@ impl TyCtxt<'tcx> {
     pub fn formal_verifier_cast_type(self, t_expr: Ty<'tcx>, t_cast: Ty<'tcx>) -> bool {
         match &mut *(self.formal_verifier_callback.borrow_mut()) {
             None => false,
-            Some(formal_verifier) => {
-                formal_verifier.cast_type(self, t_expr, t_cast)
-            }
+            Some(formal_verifier) => formal_verifier.cast_type(self, t_expr, t_cast),
         }
     }
 
     pub fn is_infinite_range(self, ty: Ty<'tcx>) -> bool {
         match &mut *(self.formal_verifier_callback.borrow_mut()) {
             None => false,
-            Some(formal_verifier) => {
-                formal_verifier.is_infinite_range(self, ty)
-            }
+            Some(formal_verifier) => formal_verifier.is_infinite_range(self, ty),
         }
     }
 
     pub fn str_infinite_range(self, ty: Ty<'tcx>) -> &'static str {
         match &mut *(self.formal_verifier_callback.borrow_mut()) {
             None => panic!("formal_verifier_callback not available"),
-            Some(formal_verifier) => {
-                formal_verifier.str_infinite_range(self, ty)
-            }
+            Some(formal_verifier) => formal_verifier.str_infinite_range(self, ty),
         }
     }
 
     pub fn mk_infinite_range(self, name: &'static str) -> Ty<'tcx> {
         match &mut *(self.formal_verifier_callback.borrow_mut()) {
             None => panic!("formal_verifier_callback not available"),
-            Some(formal_verifier) => {
-                formal_verifier.mk_infinite_range(self, name)
-            }
+            Some(formal_verifier) => formal_verifier.mk_infinite_range(self, name),
         }
     }
 }
@@ -1084,7 +1044,7 @@ pub struct GlobalCtxt<'tcx> {
     pub lint_store: Lrc<dyn Any + sync::Sync + sync::Send>,
 
     // formal verifier callback
-    pub formal_verifier_callback: FormalVerifierTypingCell,
+    pub formal_verifier_callback: crate::ty::FormalVerifierTypingCell,
 
     pub dep_graph: DepGraph,
 

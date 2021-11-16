@@ -215,13 +215,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             Some((true, _)) => {
                 // If we're going to widen the lhs type to the rhs type,
                 // don't try to coerce the rhs type to the narrower lhs type
-                self.demand_coerce(
-                    lhs_expr,
-                    lhs_ty,
-                    rhs_ty_var,
-                    Some(lhs_expr),
-                    AllowTwoPhase::No
-                );
+                self.demand_coerce(lhs_expr, lhs_ty, rhs_ty_var, Some(lhs_expr), AllowTwoPhase::No);
                 rhs_ty
             }
         };
