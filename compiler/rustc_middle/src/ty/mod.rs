@@ -285,17 +285,19 @@ pub trait FormalVerifierTyping {
         expected_ty: &Option<Ty<'tcx>>,
     ) -> Ty<'tcx>;
 
-    // Some((false, ty)) means widen rhs to lhs_ty and then return ty
-    // Some((true, ty)) means widen lhs to rhs_ty and then return ty
+    // Some((false, ty, demote_assign)) means widen rhs to lhs_ty and then return ty
+    // Some((true, ty, demote_assign)) means widen lhs to rhs_ty and then return ty
+    // demote_assign = true means demote an assignment operator to a non-assignment operator
     fn widen_binary_types<'tcx>(
         &mut self,
         tcx: TyCtxt<'tcx>,
         op: hir::BinOp,
+        is_assign: bool,
         lhs_expr: &'tcx hir::Expr<'tcx>,
         rhs_expr: &'tcx hir::Expr<'tcx>,
         lhs_ty: Ty<'tcx>,
         rhs_ty: Ty<'tcx>,
-    ) -> Option<(bool, Ty<'tcx>)>;
+    ) -> Option<(bool, Ty<'tcx>, bool)>;
 
     fn cast_type<'tcx>(&mut self, tcx: TyCtxt<'tcx>, t_expr: Ty<'tcx>, t_cast: Ty<'tcx>) -> bool;
     fn is_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> bool;

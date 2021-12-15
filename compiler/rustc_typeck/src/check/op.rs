@@ -31,7 +31,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         lhs: &'tcx hir::Expr<'tcx>,
         rhs: &'tcx hir::Expr<'tcx>,
     ) -> Ty<'tcx> {
-        let (lhs_ty, rhs_ty, return_ty) =
+        let (lhs_ty, rhs_ty, return_ty, demote_assign) =
             self.check_overloaded_binop(expr, lhs, rhs, op, IsAssign::Yes);
 
         let ty =
@@ -42,7 +42,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 return_ty
             };
 
-        self.check_lhs_assignable(lhs, "E0067", op.span);
+        if !demote_assign {
+            self.check_lhs_assignable(lhs, "E0067", op.span);
+        }
 
         ty
     }
@@ -78,7 +80,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 // Otherwise, we always treat operators as if they are
                 // overloaded. This is the way to be most flexible w/r/t
                 // types that get inferred.
-                let (lhs_ty, rhs_ty, return_ty) =
+                let (lhs_ty, rhs_ty, return_ty, _) =
                     self.check_overloaded_binop(expr, lhs_expr, rhs_expr, op, IsAssign::No);
 
                 // Supply type inference hints if relevant. Probably these
@@ -160,7 +162,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         rhs_expr: &'tcx hir::Expr<'tcx>,
         op: hir::BinOp,
         is_assign: IsAssign,
-    ) -> (Ty<'tcx>, Ty<'tcx>, Ty<'tcx>) {
+    ) -> (Ty<'tcx>, Ty<'tcx>, Ty<'tcx>, bool) {
         debug!(
             "check_overloaded_binop(expr.hir_id={}, op={:?}, is_assign={:?})",
             expr.hir_id, op, is_assign
@@ -207,12 +209,19 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // formal verifier: expand check_expr_coercable_to_type here and interpose widening
         // let rhs_ty = self.check_expr_coercable_to_type(rhs_expr, rhs_ty_var, Some(lhs_expr));
         let rhs_ty = self.check_expr_with_hint(rhs_expr, rhs_ty_var);
-        let widen_ty = self.tcx.widen_binary_types(op, lhs_expr, rhs_expr, lhs_ty, rhs_ty);
+        let widen_ty = self.tcx.widen_binary_types(
+            op,
+            is_assign == IsAssign::Yes,
+            lhs_expr,
+            rhs_expr,
+            lhs_ty,
+            rhs_ty,
+        );
         let rhs_ty = match widen_ty {
-            None | Some((false, _)) => {
+            None | Some((false, _, _)) => {
                 self.demand_coerce(rhs_expr, rhs_ty, rhs_ty_var, Some(lhs_expr), AllowTwoPhase::No)
             }
-            Some((true, _)) => {
+            Some((true, _, _)) => {
                 // If we're going to widen the lhs type to the rhs type,
                 // don't try to coerce the rhs type to the narrower lhs type
                 self.demand_coerce(lhs_expr, lhs_ty, rhs_ty_var, Some(lhs_expr), AllowTwoPhase::No);
@@ -225,8 +234,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // formal verifier
         match widen_ty {
             None => {}
-            Some((false, return_ty)) => return (lhs_ty, lhs_ty, return_ty),
-            Some((true, return_ty)) => return (rhs_ty, rhs_ty, return_ty),
+            Some((false, return_ty, demote)) => return (lhs_ty, lhs_ty, return_ty, demote),
+            Some((true, return_ty, demote)) => return (rhs_ty, rhs_ty, return_ty, demote),
         };
 
         let return_ty = match result {
@@ -498,7 +507,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
         };
 
-        (lhs_ty, rhs_ty, return_ty)
+        (lhs_ty, rhs_ty, return_ty, false)
     }
 
     /// If one of the types is an uncalled function and calling it would yield the other type,

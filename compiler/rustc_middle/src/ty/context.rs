@@ -988,16 +988,16 @@ impl TyCtxt<'tcx> {
     pub fn widen_binary_types(
         self,
         op: hir::BinOp,
+        is_assign: bool,
         lhs_expr: &'tcx hir::Expr<'tcx>,
         rhs_expr: &'tcx hir::Expr<'tcx>,
         lhs_ty: Ty<'tcx>,
         rhs_ty: Ty<'tcx>,
-    ) -> Option<(bool, Ty<'tcx>)> {
+    ) -> Option<(bool, Ty<'tcx>, bool)> {
         match &mut *(self.formal_verifier_callback.borrow_mut()) {
             None => None,
-            Some(formal_verifier) => {
-                formal_verifier.widen_binary_types(self, op, lhs_expr, rhs_expr, lhs_ty, rhs_ty)
-            }
+            Some(formal_verifier) => formal_verifier
+                .widen_binary_types(self, op, is_assign, lhs_expr, rhs_expr, lhs_ty, rhs_ty),
         }
     }
 
