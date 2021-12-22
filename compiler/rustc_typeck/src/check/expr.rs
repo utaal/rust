@@ -1115,7 +1115,26 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // no need to check for bot/err -- callee does that
         let rcvr_t = self.structurally_resolved_type(args[0].span, rcvr_t);
 
-        let method = match self.lookup_method(rcvr_t, segment, span, expr, rcvr, args) {
+        // formal verifier: possibly interpose method call before this method call
+        use crate::check::method::MethodCallee;
+        let interpose = |method: Result<MethodCallee<'tcx>, MethodError<'tcx>>| {
+            if let Ok(method) = method {
+                let inter = self.tcx.formal_verifier_interpose_call(expr, method.def_id, args);
+                if let Some((segment2, args2)) = inter {
+                    // transform e.segment(args) into e.segment2(args2).segment(args)
+                    let rcvr_t =
+                        self.check_method_call(expr, &segment2, span, args2, NoExpectation);
+                    self.tcx.formal_verifier_interposed_ty(expr, rcvr_t);
+                    self.lookup_method(rcvr_t, segment, span, expr, rcvr)
+                } else {
+                    Ok(method)
+                }
+            } else {
+                method
+            }
+        };
+
+        let method = match interpose(self.lookup_method(rcvr_t, segment, span, expr, rcvr, args)) {
             Ok(method) => {
                 // We could add a "consider `foo::<params>`" suggestion here, but I wasn't able to
                 // trigger this codepath causing `structuraly_resolved_type` to emit an error.

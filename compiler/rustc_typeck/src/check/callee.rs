@@ -476,6 +476,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
         };
 
+        // formal verifier: register for potential call interposition inside args
+        if let Some(def_id) = def_id {
+            let _ = self.tcx.formal_verifier_interpose_call(call_expr, def_id, arg_exprs);
+        }
+
         // Replace any late-bound regions that appear in the function
         // signature with region variables. We also have to
         // renormalize the associated types at this point, since they

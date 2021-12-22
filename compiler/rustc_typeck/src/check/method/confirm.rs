@@ -209,6 +209,11 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
 
         self.register_predicates(autoderef.into_obligations());
 
+        // formal verifier
+        if self.infcx.tcx.formal_verifier_no_adjust(self.call_expr) {
+            return target;
+        }
+
         // Write out the final adjustments.
         self.apply_adjustments(self.self_expr, adjustments);
 

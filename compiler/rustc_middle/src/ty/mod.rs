@@ -303,6 +303,21 @@ pub trait FormalVerifierTyping {
     fn is_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> bool;
     fn str_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> &'static str;
     fn mk_infinite_range<'tcx>(&mut self, tcx: TyCtxt<'tcx>, name: &'static str) -> Ty<'tcx>;
+
+    // Some((f', args')) means transform e.f(args) into e.f'(args').f(args)
+    fn interpose_call<'tcx>(
+        &mut self,
+        tcx: TyCtxt<'tcx>,
+        expr: &'tcx hir::Expr<'tcx>,
+        def_id: DefId,
+        args: &'tcx [hir::Expr<'tcx>],
+    ) -> Option<(hir::PathSegment<'tcx>, &'tcx [hir::Expr<'tcx>])>;
+
+    // Report type of e.f'(args') in interposed call
+    fn interposed_ty<'tcx>(&mut self, tcx: TyCtxt<'tcx>, expr: &'tcx hir::Expr<'tcx>, ty: Ty<'tcx>);
+
+    // If true, don't record lookup_method adjustments
+    fn no_adjust<'tcx>(&mut self, tcx: TyCtxt<'tcx>, expr: &'tcx hir::Expr<'tcx>) -> bool;
 }
 
 pub type FormalVerifierTypingCell = rustc_data_structures::sync::Lrc<

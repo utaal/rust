@@ -1028,6 +1028,32 @@ impl TyCtxt<'tcx> {
             Some(formal_verifier) => formal_verifier.mk_infinite_range(self, name),
         }
     }
+
+    pub fn formal_verifier_interpose_call(
+        self,
+        expr: &'tcx hir::Expr<'tcx>,
+        def_id: DefId,
+        args: &'tcx [hir::Expr<'tcx>],
+    ) -> Option<(hir::PathSegment<'tcx>, &'tcx [hir::Expr<'tcx>])> {
+        match &mut *(self.formal_verifier_callback.borrow_mut()) {
+            None => None,
+            Some(formal_verifier) => formal_verifier.interpose_call(self, expr, def_id, args),
+        }
+    }
+
+    pub fn formal_verifier_interposed_ty(self, expr: &'tcx hir::Expr<'tcx>, ty: Ty<'tcx>) {
+        match &mut *(self.formal_verifier_callback.borrow_mut()) {
+            None => {}
+            Some(formal_verifier) => formal_verifier.interposed_ty(self, expr, ty),
+        }
+    }
+
+    pub fn formal_verifier_no_adjust(self, expr: &'tcx hir::Expr<'tcx>) -> bool {
+        match &mut *(self.formal_verifier_callback.borrow_mut()) {
+            None => false,
+            Some(formal_verifier) => formal_verifier.no_adjust(self, expr),
+        }
+    }
 }
 
 pub struct GlobalCtxt<'tcx> {
