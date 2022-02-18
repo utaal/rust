@@ -810,6 +810,15 @@ impl SyntaxContext {
         HygieneData::with(|data| data.syntax_context_data[self.0 as usize].dollar_crate_name)
     }
 
+    // Create temporary unique id to use in a unique span for formal verifier's erasure
+    pub fn clone_unique_id(self) -> SyntaxContext {
+        HygieneData::with(|data| {
+            let new_syntax_context = SyntaxContext(data.syntax_context_data.len() as u32);
+            data.syntax_context_data.push(data.syntax_context_data[self.0 as usize].clone());
+            new_syntax_context
+        })
+    }
+
     pub fn edition(self) -> Edition {
         HygieneData::with(|data| data.expn_data(data.outer_expn(self)).edition)
     }
