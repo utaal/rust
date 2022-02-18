@@ -1116,7 +1116,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let rcvr_t = self.structurally_resolved_type(args[0].span, rcvr_t);
 
         // formal verifier: possibly interpose method call before this method call
-        use crate::check::method::MethodCallee;
+        use crate::check::method::{MethodCallee, MethodError};
         let interpose = |method: Result<MethodCallee<'tcx>, MethodError<'tcx>>| {
             if let Ok(method) = method {
                 let inter = self.tcx.formal_verifier_interpose_call(expr, method.def_id, args);
@@ -1125,7 +1125,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     let rcvr_t =
                         self.check_method_call(expr, &segment2, span, args2, NoExpectation);
                     self.tcx.formal_verifier_interposed_ty(expr, rcvr_t);
-                    self.lookup_method(rcvr_t, segment, span, expr, rcvr)
+                    self.lookup_method(rcvr_t, segment, span, expr, rcvr, args)
                 } else {
                     Ok(method)
                 }

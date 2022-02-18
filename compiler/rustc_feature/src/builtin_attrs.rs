@@ -457,11 +457,11 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     // Formal verifier attributes:
     // ==========================================================================
 
-    ungated!(exec, AssumedUsed, template!(Word)),
-    ungated!(proof, AssumedUsed, template!(Word)),
-    ungated!(spec, AssumedUsed, template!(Word)),
-    ungated!(trigger, AssumedUsed, template!(Word, List: "integer_multiple_trigger_group, ...")),
-    ungated!(verifier, AssumedUsed, template!(List: "verifier configuration options, ...")),
+    ungated!(exec, Normal, template!(Word), WarnFollowing),
+    ungated!(proof, Normal, template!(Word), WarnFollowing),
+    ungated!(spec, Normal, template!(Word), WarnFollowing),
+    ungated!(trigger, Normal, template!(Word, List: "integer_multiple_trigger_group, ..."), DuplicatesOk),
+    ungated!(verifier, Normal, template!(List: "verifier configuration options, ..."), DuplicatesOk),
 
     // ==========================================================================
     // Internal attributes: Stability, deprecation, and unsafe:

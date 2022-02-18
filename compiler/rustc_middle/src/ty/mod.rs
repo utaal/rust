@@ -321,7 +321,7 @@ pub trait FormalVerifierTyping {
 }
 
 pub type FormalVerifierTypingCell = rustc_data_structures::sync::Lrc<
-    std::cell::RefCell<Option<Box<dyn FormalVerifierTyping + sync::Sync + sync::Send>>>,
+    std::cell::RefCell<Option<Box<dyn FormalVerifierTyping + rustc_data_structures::sync::Sync + rustc_data_structures::sync::Send>>>,
 >;
 
 impl<'tcx> DefIdTree for TyCtxt<'tcx> {

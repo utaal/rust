@@ -166,10 +166,12 @@ impl<'tcx> fmt::Display for TypeError<'tcx> {
                 let expected = match values.expected {
                     ty::IntVarValue::IntType(ty) => ty.name_str(),
                     ty::IntVarValue::UintType(ty) => ty.name_str(),
+                    ty::IntVarValue::InfiniteRange(ty) => ty,
                 };
                 let found = match values.found {
                     ty::IntVarValue::IntType(ty) => ty.name_str(),
                     ty::IntVarValue::UintType(ty) => ty.name_str(),
+                    ty::IntVarValue::InfiniteRange(ty) => ty,
                 };
                 write!(f, "expected `{}`, found `{}`", expected, found)
             }
