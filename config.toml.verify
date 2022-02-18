@@ -151,7 +151,7 @@ changelog-seen = 2
 #doc-stage = 0
 
 # The default stage to use for the `build` subcommand
-#build-stage = 1
+build-stage = 1
 
 # The default stage to use for the `test` subcommand
 #test-stage = 1
@@ -160,7 +160,7 @@ changelog-seen = 2
 #dist-stage = 2
 
 # The default stage to use for the `install` subcommand
-#install-stage = 2
+install-stage = 1
 
 # The default stage to use for the `bench` subcommand
 #bench-stage = 2
