@@ -459,6 +459,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     ty::Char => Some(tcx.types.u8),
                     ty::RawPtr(..) => Some(tcx.types.usize),
                     ty::FnDef(..) | ty::FnPtr(_) => Some(tcx.types.usize),
+                    _ if tcx.is_infinite_range(ty) => Some(ty),
                     _ => None,
                 });
                 opt_ty.unwrap_or_else(|| self.next_int_var())
