@@ -354,6 +354,7 @@ symbols! {
         attributes,
         augmented_assignments,
         auto_traits,
+        auto_trigger, // formal verifier symbol
         automatically_derived,
         avx512_target_feature,
         await_macro,

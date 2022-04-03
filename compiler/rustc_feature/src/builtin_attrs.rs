@@ -460,6 +460,7 @@ pub const BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     ungated!(exec, Normal, template!(Word), WarnFollowing),
     ungated!(proof, Normal, template!(Word), WarnFollowing),
     ungated!(spec, Normal, template!(Word), WarnFollowing),
+    ungated!(auto_trigger, Normal, template!(Word), WarnFollowing),
     ungated!(trigger, Normal, template!(Word, List: "integer_multiple_trigger_group, ..."), DuplicatesOk),
     ungated!(verifier, Normal, template!(List: "verifier configuration options, ..."), DuplicatesOk),
 
