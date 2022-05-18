@@ -1338,12 +1338,19 @@ pub struct ExprField<'hir> {
 pub enum BlockCheckMode {
     DefaultBlock,
     UnsafeBlock(UnsafeSource),
+    Ghost(Ident, GhostMode),
 }
 
 #[derive(Copy, Clone, PartialEq, Encodable, Debug, HashStable_Generic)]
 pub enum UnsafeSource {
     CompilerGenerated,
     UserProvided,
+}
+
+#[derive(Copy, Clone, PartialEq, Encodable, Debug, HashStable_Generic)]
+pub enum GhostMode {
+    Regular,
+    NoInit,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Encodable, Hash, Debug)]
@@ -3412,7 +3419,7 @@ impl<'hir> Node<'hir> {
 // Some nodes are used a lot. Make sure they don't unintentionally get bigger.
 #[cfg(all(target_arch = "x86_64", target_pointer_width = "64"))]
 mod size_asserts {
-    rustc_data_structures::static_assert_size!(super::Block<'static>, 48);
+    rustc_data_structures::static_assert_size!(super::Block<'static>, 64);
     rustc_data_structures::static_assert_size!(super::Expr<'static>, 56);
     rustc_data_structures::static_assert_size!(super::Pat<'static>, 88);
     rustc_data_structures::static_assert_size!(super::QPath<'static>, 24);

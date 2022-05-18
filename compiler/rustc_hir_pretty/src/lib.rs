@@ -953,6 +953,7 @@ impl<'a> State<'a> {
         close_box: bool,
     ) {
         match blk.rules {
+            hir::BlockCheckMode::Ghost(_id, _mode) => self.word_space("ghost"), // TODO print id, mode
             hir::BlockCheckMode::UnsafeBlock(..) => self.word_space("unsafe"),
             hir::BlockCheckMode::DefaultBlock => (),
         }

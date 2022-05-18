@@ -839,3 +839,10 @@ mod copy_impls {
     #[stable(feature = "rust1", since = "1.0.0")]
     impl<T: ?Sized> Copy for &T {}
 }
+
+#[cfg(not(bootstrap))]
+#[unstable(feature = "ghost_macro", issue = "999999")]
+#[rustc_builtin_macro]
+pub macro ghost("ghost macro", ($token:ident, $mode:ident) $block:expr) {
+    /* compiler built-in */
+}

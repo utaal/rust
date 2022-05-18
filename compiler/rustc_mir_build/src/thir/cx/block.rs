@@ -25,7 +25,8 @@ impl<'tcx> Cx<'tcx> {
             stmts,
             expr: block.expr.map(|expr| self.mirror_expr(expr)),
             safety_mode: match block.rules {
-                hir::BlockCheckMode::DefaultBlock => BlockSafety::Safe,
+                hir::BlockCheckMode::DefaultBlock 
+                | hir::BlockCheckMode::Ghost(_, _) => BlockSafety::Safe,
                 hir::BlockCheckMode::UnsafeBlock(hir::UnsafeSource::CompilerGenerated) => {
                     BlockSafety::BuiltinUnsafe
                 }
@@ -33,6 +34,7 @@ impl<'tcx> Cx<'tcx> {
                     BlockSafety::ExplicitUnsafe(block.hir_id)
                 }
             },
+            // TODO retain ghost attrs
         }
     }
 

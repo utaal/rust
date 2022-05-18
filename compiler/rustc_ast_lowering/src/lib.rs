@@ -2089,6 +2089,13 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
         }
     }
 
+    fn lower_ghost_mode(&mut self, g: GhostMode) -> hir::GhostMode {
+        match g {
+            rustc_ast::GhostMode::Regular => hir::GhostMode::Regular,
+            rustc_ast::GhostMode::NoInit => hir::GhostMode::NoInit,
+        }
+    }
+
     fn lower_trait_bound_modifier(&mut self, f: TraitBoundModifier) -> hir::TraitBoundModifier {
         match f {
             TraitBoundModifier::None => hir::TraitBoundModifier::None,

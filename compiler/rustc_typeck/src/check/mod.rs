@@ -197,7 +197,7 @@ impl UnsafetyState {
             unsafety => {
                 let (unsafety, def) = match blk.rules {
                     BlockCheckMode::UnsafeBlock(..) => (hir::Unsafety::Unsafe, blk.hir_id),
-                    BlockCheckMode::DefaultBlock => (unsafety, self.def),
+                    BlockCheckMode::DefaultBlock | BlockCheckMode::Ghost(_, _) => (unsafety, self.def),
                 };
                 UnsafetyState { def, unsafety, from_fn: false }
             }

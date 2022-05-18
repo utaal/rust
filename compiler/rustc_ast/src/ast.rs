@@ -1086,12 +1086,19 @@ pub struct ExprField {
 pub enum BlockCheckMode {
     Default,
     Unsafe(UnsafeSource),
+    Ghost(Ident, GhostMode),
 }
 
 #[derive(Clone, PartialEq, Encodable, Decodable, Debug, Copy)]
 pub enum UnsafeSource {
     CompilerGenerated,
     UserProvided,
+}
+
+#[derive(Clone, PartialEq, Encodable, Decodable, Debug, Copy)]
+pub enum GhostMode {
+    Regular,
+    NoInit,
 }
 
 /// A constant (expression) that's not an item or associated item,

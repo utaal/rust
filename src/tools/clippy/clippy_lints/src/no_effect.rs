@@ -262,7 +262,7 @@ fn reduce_expression<'a>(cx: &LateContext<'_>, expr: &'a Expr<'a>) -> Option<Vec
                 block.expr.as_ref().and_then(|e| {
                     match block.rules {
                         BlockCheckMode::UnsafeBlock(UnsafeSource::UserProvided) => None,
-                        BlockCheckMode::DefaultBlock => Some(vec![&**e]),
+                        BlockCheckMode::DefaultBlock | BlockCheckMode::Ghost(_, _) => Some(vec![&**e]),
                         // in case of compiler-inserted signaling blocks
                         BlockCheckMode::UnsafeBlock(_) => reduce_expression(cx, e),
                     }

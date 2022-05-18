@@ -491,7 +491,7 @@ fn block_prefix(context: &RewriteContext<'_>, block: &ast::Block, shape: Shape) 
                 "unsafe ".to_owned()
             }
         }
-        ast::BlockCheckMode::Default => String::new(),
+        ast::BlockCheckMode::Default | ast::BlockCheckMode::Ghost(_, _) => String::new(),
     })
 }
 
@@ -532,12 +532,12 @@ pub(crate) fn rewrite_block_with_visitor(
     visitor.block_indent = shape.indent;
     visitor.is_if_else_block = context.is_if_else_block();
     match (block.rules, label) {
-        (ast::BlockCheckMode::Unsafe(..), _) | (ast::BlockCheckMode::Default, Some(_)) => {
+        (ast::BlockCheckMode::Unsafe(..), _) | (ast::BlockCheckMode::Default | ast::BlockCheckMode::Ghost(_, _), Some(_)) => {
             let snippet = context.snippet(block.span);
             let open_pos = snippet.find_uncommented("{")?;
             visitor.last_pos = block.span.lo() + BytePos(open_pos as u32)
         }
-        (ast::BlockCheckMode::Default, None) => visitor.last_pos = block.span.lo(),
+        (ast::BlockCheckMode::Default | ast::BlockCheckMode::Ghost(_, _), None) => visitor.last_pos = block.span.lo(),
     }
 
     let inner_attrs = attrs.map(inner_attributes);

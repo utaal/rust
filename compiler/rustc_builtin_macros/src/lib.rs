@@ -42,6 +42,7 @@ mod source_util;
 mod test;
 mod trace_macros;
 mod util;
+mod ghost;
 
 pub mod asm;
 pub mod cmdline_attrs;
@@ -75,6 +76,7 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
         format_args_nl: format::expand_format_args_nl,
         format_args: format::expand_format_args,
         const_format_args: format::expand_format_args,
+        ghost: ghost::expand_ghost,
         global_asm: asm::expand_global_asm,
         include_bytes: source_util::expand_include_bytes,
         include_str: source_util::expand_include_str,
