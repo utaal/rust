@@ -1,4 +1,4 @@
-name: build and upload binary of custom rust
+name: rust-verification
 
 on: [push]   # to turn on CI on pull_request, change this to ->  on: [push, pull_request]
 
@@ -23,7 +23,8 @@ jobs:
       - name: build and install
         run: |  
           cp config.toml.verify config.toml
-          ./x.py install -i --stage 1
+          ./x.py install -i --stage 2
+          cd install; tar -cvzf ../rust_install.tar.gz .; cd ../
 
       # upload our rust binaries to github. 
       # When this ends, the binary can be downloaded at action tab of this github repository
@@ -32,6 +33,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: rust-bin-lib-etc
-          path: |
-            install      
+          path: rust_install.tar.gz
 
