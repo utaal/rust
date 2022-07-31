@@ -4,9 +4,11 @@ on: [push]   # to turn on CI on pull_request, change this to ->  on: [push, pull
 
 jobs:
   build_and_save:
-    # let's use a self-hosted linux runner at CMU server
-    runs-on: [self-hosted, linux]    
+    runs-on: ubuntu-latest
     steps:
+      - name: install dependencies
+        run: sudo apt install ninja-build
+
       # make our repository available for github workflow
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -21,16 +23,7 @@ jobs:
       - name: build and install
         run: |  
           cp config.toml.verify config.toml
-          ./x.py install -i --stage 2
-          # to minimize the window of race between two CI (rust, verus), 
-          # instead of just "cp -r install ~/local_bin", do below lines
-          mv install install_tmp
-          cp -r install_tmp ~/local_bin
-          mv ~/local_bin/install ~/local_bin/install_old
-          mv ~/local_bin/install_tmp ~/local_bin/install
-          rm -r ~/local_bin/install_old
-          # restore name for upload-artifact
-          mv install_tmp install
+          ./x.py install -i --stage 1
 
       # upload our rust binaries to github. 
       # When this ends, the binary can be downloaded at action tab of this github repository
