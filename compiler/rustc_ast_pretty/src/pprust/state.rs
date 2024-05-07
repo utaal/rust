@@ -1299,6 +1299,7 @@ impl<'a> State<'a> {
         match blk.rules {
             BlockCheckMode::Unsafe(..) => self.word_space("unsafe"),
             BlockCheckMode::Default => (),
+            BlockCheckMode::Ghost => self.word_space("ghost!"),
         }
         self.maybe_print_comment(blk.span.lo());
         self.ann.pre(self, AnnNode::Block(blk));

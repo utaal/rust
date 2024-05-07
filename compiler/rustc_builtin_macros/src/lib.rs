@@ -40,6 +40,7 @@ mod env;
 mod errors;
 mod format;
 mod format_foreign;
+mod ghost;
 mod global_allocator;
 mod log_syntax;
 mod pattern_type;
@@ -84,6 +85,7 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
         file: source_util::expand_file,
         format_args: format::expand_format_args,
         format_args_nl: format::expand_format_args_nl,
+        ghost: ghost::expand_ghost,
         global_asm: asm::expand_global_asm,
         include: source_util::expand_include,
         include_bytes: source_util::expand_include_bytes,

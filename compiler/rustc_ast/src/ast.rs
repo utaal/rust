@@ -1140,6 +1140,7 @@ pub struct ExprField {
 pub enum BlockCheckMode {
     Default,
     Unsafe(UnsafeSource),
+    Ghost,
 }
 
 #[derive(Clone, PartialEq, Encodable, Decodable, Debug, Copy)]

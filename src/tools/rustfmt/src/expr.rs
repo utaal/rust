@@ -503,6 +503,7 @@ fn block_prefix(context: &RewriteContext<'_>, block: &ast::Block, shape: Shape) 
             }
         }
         ast::BlockCheckMode::Default => String::new(),
+        ast::BlockCheckMode::Ghost => String::new(), // TODO(ghost)
     })
 }
 
@@ -549,6 +550,7 @@ pub(crate) fn rewrite_block_with_visitor(
             visitor.last_pos = block.span.lo() + BytePos(open_pos as u32)
         }
         (ast::BlockCheckMode::Default, None) => visitor.last_pos = block.span.lo(),
+        (ast::BlockCheckMode::Ghost, _) => visitor.last_pos = block.span.lo(), // TODO(ghost)
     }
 
     let inner_attrs = attrs.map(inner_attributes);

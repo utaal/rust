@@ -30,6 +30,7 @@ impl<'tcx> Cx<'tcx> {
                 hir::BlockCheckMode::UnsafeBlock(hir::UnsafeSource::UserProvided) => {
                     BlockSafety::ExplicitUnsafe(block.hir_id)
                 }
+                hir::BlockCheckMode::Ghost => BlockSafety::Safe, // TODO(ghost)
             },
         };
 

@@ -908,6 +908,7 @@ impl<'a> State<'a> {
         match blk.rules {
             hir::BlockCheckMode::UnsafeBlock(..) => self.word_space("unsafe"),
             hir::BlockCheckMode::DefaultBlock => (),
+            hir::BlockCheckMode::Ghost => self.word_space("ghost!"),
         }
         self.maybe_print_comment(blk.span.lo());
         self.ann.pre(self, AnnNode::Block(blk));

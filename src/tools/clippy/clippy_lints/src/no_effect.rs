@@ -363,6 +363,7 @@ fn reduce_expression<'a>(cx: &LateContext<'_>, expr: &'a Expr<'a>) -> Option<Vec
                         BlockCheckMode::DefaultBlock => Some(vec![&**e]),
                         // in case of compiler-inserted signaling blocks
                         BlockCheckMode::UnsafeBlock(_) => reduce_expression(cx, e),
+                        BlockCheckMode::Ghost => Some(vec![&**e]), // TODO(ghost)
                     }
                 })
             } else {
